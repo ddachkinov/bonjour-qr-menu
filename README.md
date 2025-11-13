@@ -168,14 +168,19 @@ This starts all services concurrently:
 5. (Optional) Seed sample data:
 
 ```bash
+# Install seed script dependencies
 cd scripts
 npm install
+
+# Run the seed script
 npm run seed
 ```
 
 This creates a sample restaurant "Bonjour Bistro" with a complete menu (appetizers, main courses, desserts, beverages). Perfect for testing and demos!
 
 Login credentials will be displayed after seeding completes.
+
+**Note:** Make sure to run `npm install` in the scripts directory before running the seed script.
 
 ### Using Docker Compose
 
