@@ -14,6 +14,9 @@ A complete SaaS platform for restaurants to create, manage, and publish QR code-
 - Public-facing mobile-optimized menu viewer
 - Table session isolation for cart management
 - Order submission with waiter QR codes
+- Waiter order claiming and management
+- Item-level delivery tracking
+- Customer order history with real-time updates
 - Real-time order status tracking
 - JWT-based authentication
 - Rate limiting and security middleware
@@ -315,14 +318,31 @@ Add item to cart.
 #### POST /api/v1/public/session/:sessionId/order
 Submit order and receive waiter QR.
 
+#### GET /api/v1/public/session/:sessionId/orders
+Get all orders for a customer session.
+
 ### Order Endpoints
 
-Require authentication.
+#### Public Waiter Endpoints (No Authentication)
 
-#### GET /api/v1/orders
+##### POST /api/v1/orders/scan
+Scan order QR code to view order details.
+
+##### POST /api/v1/orders/claim
+Claim an order by entering waiter name.
+
+##### POST /api/v1/orders/items/delivered
+Mark specific items as delivered.
+
+##### GET /api/v1/orders/waiter/:waiterName
+Get all active orders for a specific waiter.
+
+#### Protected Endpoints (Require Authentication)
+
+##### GET /api/v1/orders
 List orders for tenant.
 
-#### PATCH /api/v1/orders/:orderId/status
+##### PATCH /api/v1/orders/:orderId/status
 Update order status.
 
 ## Usage Guide
@@ -341,17 +361,23 @@ Update order status.
 ### For Diners
 
 1. Scan the QR code on your table
-2. Browse the menu
+2. Browse the menu with photos and descriptions
 3. Add items to cart
-4. Submit order
-5. Receive waiter QR code
-6. Show QR to waiter when order arrives
+4. Submit order with optional special instructions
+5. Receive waiter QR code - show this to the waiter
+6. View order history to track all your orders
+7. See real-time delivery progress as items are brought to your table
+8. Monitor order status: New → In Kitchen → Delivering → Completed
 
 ### For Waiters
 
-1. Scan customer's waiter QR code
-2. View order details
-3. Deliver food to table
+1. Scan customer's waiter QR code from the order screen
+2. Enter your name to claim the order
+3. View order details and special instructions
+4. Mark individual items as delivered by checking them off
+5. View all your active orders at /waiter/my-orders
+6. Track delivery progress in real-time
+7. Order automatically completes when all items are delivered
 
 ## Configuration
 
