@@ -29,23 +29,50 @@ export default function MyOrders() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [waiterId, setWaiterId] = useState<string | null>(null);
   const [waiterName, setWaiterName] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedName = localStorage.getItem('waiter_name');
-    if (!savedName) {
-      toast.error('Please claim an order first to see your orders');
-      return;
-    }
-    setWaiterName(savedName);
-    fetchOrders(savedName);
-    const interval = setInterval(() => fetchOrders(savedName), 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
+    checkAuth();
   }, []);
 
-  const fetchOrders = async (name: string) => {
+  useEffect(() => {
+    if (isAuthenticated && waiterId) {
+      fetchOrders(waiterId);
+      const interval = setInterval(() => fetchOrders(waiterId), 10000); // Refresh every 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, waiterId]);
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem('waiter_token');
+    const id = localStorage.getItem('waiter_id');
+    const name = localStorage.getItem('waiter_name');
+
+    if (!token || !id || !name) {
+      // Redirect to login
+      router.push('/waiter/login?redirect=/waiter/my-orders');
+      return;
+    }
+
     try {
-      const response = await axios.get(`${API_URL}/api/v1/orders/waiter/${encodeURIComponent(name)}`);
+      await axios.post(`${API_URL}/api/v1/waiters/verify`, { token });
+      setIsAuthenticated(true);
+      setWaiterId(id);
+      setWaiterName(name);
+    } catch (error) {
+      // Token invalid, clear and redirect to login
+      localStorage.removeItem('waiter_token');
+      localStorage.removeItem('waiter_id');
+      localStorage.removeItem('waiter_name');
+      router.push('/waiter/login?redirect=/waiter/my-orders');
+    }
+  };
+
+  const fetchOrders = async (id: string) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/v1/orders/waiter/${id}`);
       setOrders(response.data);
     } catch (error: any) {
       toast.error('Failed to load orders');
@@ -87,21 +114,10 @@ export default function MyOrders() {
     }
   };
 
-  if (isLoading) {
+  if (!isAuthenticated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Loading your orders...</p>
-      </div>
-    );
-  }
-
-  if (!waiterName) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">No Active Session</h2>
-          <p className="text-gray-600">Scan an order QR code to get started</p>
-        </div>
+        <p className="text-gray-600">Loading...</p>
       </div>
     );
   }
@@ -202,7 +218,7 @@ export default function MyOrders() {
 
         {orders.length > 0 && (
           <button
-            onClick={() => fetchOrders(waiterName!)}
+            onClick={() => fetchOrders(waiterId!)}
             className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-lg transition-colors"
           >
             Refresh Orders

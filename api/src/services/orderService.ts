@@ -84,7 +84,7 @@ export class OrderService {
     let queryText = `
       SELECT id, tenant_id, menu_id, session_id, order_token,
              items, total_amount, currency, status, notes,
-             waiter_ack_user_id, created_at, updated_at
+             waiter_id, created_at, updated_at
       FROM orders
       WHERE id = $1
     `;
@@ -103,7 +103,7 @@ export class OrderService {
     const result = await query(
       `SELECT id, tenant_id, menu_id, session_id, order_token,
               items, total_amount, currency, status, notes,
-              waiter_ack_user_id, created_at, updated_at
+              waiter_id, created_at, updated_at
        FROM orders
        WHERE order_token = $1`,
       [orderToken]
@@ -126,7 +126,7 @@ export class OrderService {
     let paramCount = 2;
 
     if (waiterUserId && status === 'acknowledged') {
-      updateFields.push(`waiter_ack_user_id = $${paramCount}`);
+      updateFields.push(`waiter_id = $${paramCount}`);
       params.push(waiterUserId);
       paramCount++;
     }
@@ -139,7 +139,7 @@ export class OrderService {
        WHERE id = $${paramCount} AND tenant_id = $${paramCount + 1}
        RETURNING id, tenant_id, menu_id, session_id, order_token,
                  items, total_amount, currency, status, notes,
-                 waiter_ack_user_id, created_at, updated_at`,
+                 waiter_id, created_at, updated_at`,
       params
     );
 
@@ -159,7 +159,7 @@ export class OrderService {
     let queryText = `
       SELECT id, tenant_id, menu_id, session_id, order_token,
              items, total_amount, currency, status, notes,
-             waiter_ack_user_id, created_at, updated_at
+             waiter_id, created_at, updated_at
       FROM orders
       WHERE tenant_id = $1
     `;
@@ -211,7 +211,7 @@ export class OrderService {
     return result.rows;
   }
 
-  static async claimOrder(orderToken: string, waiterName: string): Promise<Order> {
+  static async claimOrder(orderToken: string, waiterId: string): Promise<Order> {
     const order = await this.getOrderByToken(orderToken);
 
     if (!order) {
@@ -233,15 +233,15 @@ export class OrderService {
       `UPDATE orders
        SET status = 'acknowledged',
            items = $1,
-           waiter_ack_user_id = $2
+           waiter_id = $2
        WHERE order_token = $3
        RETURNING id, tenant_id, menu_id, session_id, order_token,
                  items, total_amount, currency, status, notes,
-                 waiter_ack_user_id, created_at, updated_at`,
-      [JSON.stringify(itemsWithStatus), waiterName, orderToken]
+                 waiter_id, created_at, updated_at`,
+      [JSON.stringify(itemsWithStatus), waiterId, orderToken]
     );
 
-    logger.info('Order claimed by waiter', { orderId: order.id, waiterName });
+    logger.info('Order claimed by waiter', { orderId: order.id, waiterId });
     return result.rows[0];
   }
 
@@ -287,16 +287,16 @@ export class OrderService {
     return result.rows[0];
   }
 
-  static async getWaiterOrders(waiterName: string): Promise<Order[]> {
+  static async getWaiterOrders(waiterId: string): Promise<Order[]> {
     const result = await query(
       `SELECT id, tenant_id, menu_id, session_id, order_token,
               items, total_amount, currency, status, notes,
-              waiter_ack_user_id, created_at, updated_at
+              waiter_id, created_at, updated_at
        FROM orders
-       WHERE waiter_ack_user_id = $1
+       WHERE waiter_id = $1
          AND status IN ('acknowledged', 'in_progress')
        ORDER BY created_at DESC`,
-      [waiterName]
+      [waiterId]
     );
 
     return result.rows;
@@ -306,7 +306,7 @@ export class OrderService {
     const result = await query(
       `SELECT id, tenant_id, menu_id, session_id, order_token,
               items, total_amount, currency, status, notes,
-              waiter_ack_user_id, created_at, updated_at
+              waiter_id, created_at, updated_at
        FROM orders
        WHERE session_id = $1
        ORDER BY created_at DESC`,

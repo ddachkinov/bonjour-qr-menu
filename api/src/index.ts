@@ -13,6 +13,7 @@ import menuRoutes from './routes/menus';
 import orderRoutes from './routes/orders';
 import publicRoutes from './routes/public';
 import uploadRoutes from './routes/uploads';
+import waiterRoutes from './routes/waiters';
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/v1/menus', menuRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/uploads', uploadRoutes);
 app.use('/api/v1/public', publicRoutes);
+app.use('/api/v1/waiters', waiterRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

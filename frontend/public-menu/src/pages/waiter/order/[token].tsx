@@ -30,19 +30,47 @@ export default function WaiterOrderView() {
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [waiterName, setWaiterName] = useState('');
   const [isClaiming, setIsClaiming] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [waiterId, setWaiterId] = useState<string | null>(null);
+  const [waiterName, setWaiterName] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token) {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (token && isAuthenticated) {
       fetchOrder();
-      // Load saved waiter name
-      const savedName = localStorage.getItem('waiter_name');
-      if (savedName) {
-        setWaiterName(savedName);
-      }
     }
-  }, [token]);
+  }, [token, isAuthenticated]);
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem('waiter_token');
+    const id = localStorage.getItem('waiter_id');
+    const name = localStorage.getItem('waiter_name');
+
+    if (!token || !id || !name) {
+      // Redirect to login with return URL
+      const currentPath = router.asPath;
+      router.push(`/waiter/login?tenant_id=${order?.tenant_id || ''}&redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
+    try {
+      await axios.post(`${API_URL}/api/v1/waiters/verify`, { token });
+      setIsAuthenticated(true);
+      setWaiterId(id);
+      setWaiterName(name);
+    } catch (error) {
+      // Token invalid, clear and redirect to login
+      localStorage.removeItem('waiter_token');
+      localStorage.removeItem('waiter_id');
+      localStorage.removeItem('waiter_name');
+      const currentPath = router.asPath;
+      router.push(`/waiter/login?tenant_id=${order?.tenant_id || ''}&redirect=${encodeURIComponent(currentPath)}`);
+    }
+  };
 
   const fetchOrder = async () => {
     try {
@@ -58,8 +86,8 @@ export default function WaiterOrderView() {
   };
 
   const handleClaim = async () => {
-    if (!waiterName.trim()) {
-      toast.error('Please enter your name');
+    if (!waiterId) {
+      toast.error('Not authenticated');
       return;
     }
 
@@ -67,10 +95,9 @@ export default function WaiterOrderView() {
     try {
       const response = await axios.post(`${API_URL}/api/v1/orders/claim`, {
         order_token: token,
-        waiter_name: waiterName.trim(),
+        waiter_id: waiterId,
       });
       setOrder(response.data);
-      localStorage.setItem('waiter_name', waiterName.trim());
       toast.success('Order claimed successfully!');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to claim order');
@@ -108,10 +135,10 @@ export default function WaiterOrderView() {
     return { delivered, total };
   };
 
-  if (isLoading) {
+  if (!isAuthenticated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Loading order...</p>
+        <p className="text-gray-600">Loading...</p>
       </div>
     );
   }
@@ -138,9 +165,9 @@ export default function WaiterOrderView() {
           <h1 className="text-2xl font-bold text-gray-900">
             {isClaimed ? 'Order Details' : 'New Order'}
           </h1>
-          {isClaimed && order.waiter_ack_user_id && (
+          {waiterName && (
             <p className="text-sm text-gray-600 mt-1">
-              Claimed by: {order.waiter_ack_user_id}
+              Waiter: {waiterName}
             </p>
           )}
         </div>
@@ -270,28 +297,16 @@ export default function WaiterOrderView() {
         {!isClaimed && (
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Claim This Order</h3>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="waiterName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  id="waiterName"
-                  value={waiterName}
-                  onChange={(e) => setWaiterName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <button
-                onClick={handleClaim}
-                disabled={isClaiming || !waiterName.trim()}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold py-3 rounded-lg transition-colors"
-              >
-                {isClaiming ? 'Claiming...' : 'Claim Order'}
-              </button>
-            </div>
+            <p className="text-gray-600 mb-4">
+              You are logged in as <span className="font-semibold">{waiterName}</span>
+            </p>
+            <button
+              onClick={handleClaim}
+              disabled={isClaiming}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold py-3 rounded-lg transition-colors"
+            >
+              {isClaiming ? 'Claiming...' : 'Claim Order'}
+            </button>
           </div>
         )}
 

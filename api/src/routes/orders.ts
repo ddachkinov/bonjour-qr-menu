@@ -41,7 +41,7 @@ router.post(
   publicLimiter,
   [
     body('order_token').notEmpty(),
-    body('waiter_name').notEmpty().trim(),
+    body('waiter_id').isUUID().withMessage('Valid waiter ID required'),
   ],
   async (req, res, next) => {
     try {
@@ -50,8 +50,8 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { order_token, waiter_name } = req.body;
-      const order = await OrderService.claimOrder(order_token, waiter_name);
+      const { order_token, waiter_id } = req.body;
+      const order = await OrderService.claimOrder(order_token, waiter_id);
 
       res.json(order);
     } catch (error) {
@@ -85,12 +85,18 @@ router.post(
 );
 
 router.get(
-  '/waiter/:waiterName',
+  '/waiter/:waiterId',
   publicLimiter,
+  param('waiterId').isUUID(),
   async (req, res, next) => {
     try {
-      const { waiterName } = req.params;
-      const orders = await OrderService.getWaiterOrders(waiterName);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { waiterId } = req.params;
+      const orders = await OrderService.getWaiterOrders(waiterId);
 
       res.json(orders);
     } catch (error) {
