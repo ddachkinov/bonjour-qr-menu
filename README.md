@@ -162,6 +162,18 @@ This starts all services concurrently:
 - Dashboard: http://localhost:3000
 - Public Menu: http://localhost:3002
 
+5. (Optional) Seed sample data:
+
+```bash
+cd scripts
+npm install
+npm run seed
+```
+
+This creates a sample restaurant "Bonjour Bistro" with a complete menu (appetizers, main courses, desserts, beverages). Perfect for testing and demos!
+
+Login credentials will be displayed after seeding completes.
+
 ### Using Docker Compose
 
 Start all services with Docker:

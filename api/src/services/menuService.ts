@@ -91,7 +91,11 @@ export class MenuService {
     }
 
     const subdomain = tenantResult.rows[0].subdomain;
-    const publicUrl = `https://${subdomain}.${config.appBaseDomain}/menu/${menuId}`;
+    // For local development, use direct localhost URL. In production, use subdomain routing.
+    const isLocal = config.env === 'development' || config.appBaseDomain.includes('localhost');
+    const publicUrl = isLocal
+      ? `http://localhost:3002/menu/${menuId}`
+      : `https://${subdomain}.${config.appBaseDomain}/menu/${menuId}`;
 
     const result = await query(
       `UPDATE menus

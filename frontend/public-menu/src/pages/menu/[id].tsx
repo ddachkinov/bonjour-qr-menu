@@ -185,33 +185,42 @@ export default function PublicMenu() {
                 {categoryItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-lg shadow p-4 flex justify-between items-start"
+                    className="bg-white rounded-lg shadow overflow-hidden"
                   >
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{item.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                    {item.photos && item.photos.length > 0 && (
+                      <img
+                        src={item.photos[0]}
+                        alt={item.title}
+                        className="w-full h-48 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-gray-900 text-lg flex-1">{item.title}</h3>
+                        <p className="text-xl font-bold text-indigo-600 ml-4">
+                          ${(item.price / 100).toFixed(2)}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{item.description}</p>
                       {item.dietary_flags && item.dietary_flags.length > 0 && (
-                        <div className="mt-2 flex gap-2">
+                        <div className="flex flex-wrap gap-2 mb-3">
                           {item.dietary_flags.map((flag) => (
                             <span
                               key={flag}
-                              className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                              className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"
                             >
                               {flag}
                             </span>
                           ))}
                         </div>
                       )}
-                      <p className="text-lg font-bold text-gray-900 mt-2">
-                        ${(item.price / 100).toFixed(2)}
-                      </p>
+                      <button
+                        onClick={() => handleAddToCart(item)}
+                        className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 font-medium active:bg-indigo-800 transition-colors"
+                      >
+                        Add to Cart
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleAddToCart(item)}
-                      className="ml-4 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex-shrink-0"
-                    >
-                      Add
-                    </button>
                   </div>
                 ))}
               </div>

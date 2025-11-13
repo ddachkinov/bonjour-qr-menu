@@ -4,6 +4,7 @@ import { useAuthStore } from '../../../store/authStore';
 import api from '../../../lib/api';
 import toast from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
+import ItemForm from '../../../components/ItemForm';
 import type { Menu, Category, Item } from '@qrmenu/shared-types';
 
 export default function MenuEditor() {
@@ -16,6 +17,9 @@ export default function MenuEditor() {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
+  const [showItemForm, setShowItemForm] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -69,31 +73,44 @@ export default function MenuEditor() {
     }
   };
 
-  const addItem = async (categoryId: string) => {
-    const title = prompt('Enter item title:');
-    if (!title) return;
+  const openItemForm = (categoryId: string, item?: Item) => {
+    setSelectedCategory(categoryId);
+    setEditingItem(item || null);
+    setShowItemForm(true);
+  };
 
-    const description = prompt('Enter item description:') || '';
-    const priceStr = prompt('Enter price in cents (e.g., 1500 for $15.00):');
-    const price = parseInt(priceStr || '0', 10);
+  const closeItemForm = () => {
+    setShowItemForm(false);
+    setSelectedCategory(null);
+    setEditingItem(null);
+  };
 
-    if (price <= 0) {
-      toast.error('Invalid price');
-      return;
-    }
+  const handleItemFormSuccess = () => {
+    closeItemForm();
+    fetchMenuData();
+  };
+
+  const deleteItem = async (itemId: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      await api.post(`/menus/${id}/items`, {
-        category_id: categoryId,
-        title,
-        description,
-        price,
-        currency: 'USD',
-      });
-      toast.success('Item added!');
+      await api.delete(`/menus/${id}/items/${itemId}`);
+      toast.success('Item deleted!');
       fetchMenuData();
     } catch (error: any) {
-      toast.error('Failed to add item');
+      toast.error('Failed to delete item');
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    if (!confirm('Are you sure you want to delete this category and all its items?')) return;
+
+    try {
+      await api.delete(`/menus/${id}/categories/${categoryId}`);
+      toast.success('Category deleted!');
+      fetchMenuData();
+    } catch (error: any) {
+      toast.error('Failed to delete category');
     }
   };
 
@@ -164,6 +181,14 @@ export default function MenuEditor() {
                 <QRCodeSVG value={menu.public_url} size={256} />
               </div>
               <p className="mt-4 text-sm text-gray-600">{menu.public_url}</p>
+              <a
+                href={menu.public_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-indigo-600 hover:text-indigo-500"
+              >
+                Open public menu →
+              </a>
             </div>
           )}
 
@@ -180,12 +205,20 @@ export default function MenuEditor() {
                   <div key={category.id} className="bg-white rounded-lg shadow">
                     <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                       <h2 className="text-xl font-bold">{category.name}</h2>
-                      <button
-                        onClick={() => addItem(category.id)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm"
-                      >
-                        Add Item
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => openItemForm(category.id)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm"
+                        >
+                          Add Item
+                        </button>
+                        <button
+                          onClick={() => deleteCategory(category.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm"
+                        >
+                          Delete Category
+                        </button>
+                      </div>
                     </div>
                     <div className="px-6 py-4">
                       {categoryItems.length === 0 ? (
@@ -193,7 +226,32 @@ export default function MenuEditor() {
                       ) : (
                         <div className="space-y-4">
                           {categoryItems.map((item) => (
-                            <div key={item.id} className="flex justify-between items-start border-b border-gray-100 pb-4 last:border-0">
+                            <div key={item.id} className="flex border-b border-gray-100 pb-4 last:border-0">
+                              <div className="flex-shrink-0 mr-4">
+                                {item.photos && item.photos.length > 0 ? (
+                                  <img
+                                    src={item.photos[0]}
+                                    alt={item.title}
+                                    className="w-20 h-20 object-cover rounded"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 bg-gray-200 rounded flex items-center justify-center">
+                                    <svg
+                                      className="w-8 h-8 text-gray-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                  </div>
+                                )}
+                              </div>
                               <div className="flex-1">
                                 <h3 className="font-medium">{item.title}</h3>
                                 <p className="text-sm text-gray-600 mt-1">{item.description}</p>
@@ -210,8 +268,22 @@ export default function MenuEditor() {
                                   </div>
                                 )}
                               </div>
-                              <div className="ml-4 text-right">
+                              <div className="ml-4 text-right flex flex-col justify-between">
                                 <p className="font-bold">${(item.price / 100).toFixed(2)}</p>
+                                <div className="flex space-x-2 mt-2">
+                                  <button
+                                    onClick={() => openItemForm(category.id, item)}
+                                    className="text-indigo-600 hover:text-indigo-700 text-sm"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteItem(item.id)}
+                                    className="text-red-600 hover:text-red-700 text-sm"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -225,6 +297,16 @@ export default function MenuEditor() {
           )}
         </main>
       </div>
+
+      {showItemForm && selectedCategory && (
+        <ItemForm
+          menuId={id as string}
+          categoryId={selectedCategory}
+          item={editingItem || undefined}
+          onSuccess={handleItemFormSuccess}
+          onCancel={closeItemForm}
+        />
+      )}
     </div>
   );
 }
