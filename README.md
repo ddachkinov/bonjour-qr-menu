@@ -182,6 +182,15 @@ Login credentials will be displayed after seeding completes.
 
 **Note:** Make sure to run `npm install` in the scripts directory before running the seed script.
 
+6. Run database migrations:
+
+```bash
+# Run the waiter authentication migration
+./scripts/run-migration.sh
+```
+
+This adds the waiters table for PIN-based waiter authentication.
+
 ### Using Docker Compose
 
 Start all services with Docker:
@@ -326,6 +335,55 @@ Submit order and receive waiter QR.
 #### GET /api/v1/public/session/:sessionId/orders
 Get all orders for a customer session.
 
+### Waiter Endpoints
+
+#### Public Waiter Authentication (No Authentication Required)
+
+##### POST /api/v1/waiters/login
+Authenticate waiter with tenant_id, name, and 4-digit PIN. Returns JWT token valid for 8 hours.
+
+**Request:**
+```json
+{
+  "tenant_id": "uuid",
+  "name": "John Doe",
+  "pin": "1234"
+}
+```
+
+**Response:**
+```json
+{
+  "waiter": {
+    "id": "uuid",
+    "tenant_id": "uuid",
+    "name": "John Doe",
+    "active": true
+  },
+  "token": "jwt-token"
+}
+```
+
+##### POST /api/v1/waiters/verify
+Verify waiter JWT token is valid.
+
+#### Protected Waiter Management (Requires Restaurant Authentication)
+
+##### POST /api/v1/waiters
+Create new waiter account.
+
+##### GET /api/v1/waiters
+List all waiters for restaurant.
+
+##### GET /api/v1/waiters/:waiterId
+Get waiter details.
+
+##### PATCH /api/v1/waiters/:waiterId
+Update waiter (name, PIN, or active status).
+
+##### DELETE /api/v1/waiters/:waiterId
+Delete waiter account.
+
 ### Order Endpoints
 
 #### Public Waiter Endpoints (No Authentication)
@@ -334,13 +392,21 @@ Get all orders for a customer session.
 Scan order QR code to view order details.
 
 ##### POST /api/v1/orders/claim
-Claim an order by entering waiter name.
+Claim an order using authenticated waiter_id.
+
+**Request:**
+```json
+{
+  "order_token": "hex-string",
+  "waiter_id": "uuid"
+}
+```
 
 ##### POST /api/v1/orders/items/delivered
 Mark specific items as delivered.
 
-##### GET /api/v1/orders/waiter/:waiterName
-Get all active orders for a specific waiter.
+##### GET /api/v1/orders/waiter/:waiterId
+Get all active orders for authenticated waiter (requires valid waiter_id).
 
 #### Protected Endpoints (Require Authentication)
 
@@ -376,13 +442,18 @@ Update order status.
 
 ### For Waiters
 
-1. Scan customer's waiter QR code from the order screen
-2. Enter your name to claim the order
-3. View order details and special instructions
-4. Mark individual items as delivered by checking them off
-5. View all your active orders at /waiter/my-orders
-6. Track delivery progress in real-time
-7. Order automatically completes when all items are delivered
+1. **First time login**: Get your 4-digit PIN from your manager
+2. Go to http://localhost:3002/waiter/login?tenant_id=YOUR_TENANT_ID
+3. Enter your name and PIN to log in (session lasts 8 hours)
+4. Scan customer's waiter QR code from the order screen
+5. Claim the order (automatically uses your authenticated waiter account)
+6. View order details and special instructions
+7. Mark individual items as delivered by checking them off
+8. View all your active orders at /waiter/my-orders
+9. Track delivery progress in real-time
+10. Order automatically completes when all items are delivered
+
+**Note**: Waiter authentication is required to prevent errors and improve accountability. Each waiter logs in once per shift with their PIN.
 
 ## Configuration
 
