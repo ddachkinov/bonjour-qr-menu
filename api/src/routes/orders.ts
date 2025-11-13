@@ -1,12 +1,105 @@
 import { Router } from 'express';
-import { body, param, query, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { OrderService } from '../services/orderService';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { apiLimiter } from '../middleware/rateLimit';
+import { apiLimiter, publicLimiter } from '../middleware/rateLimit';
 import type { OrderStatus } from '@qrmenu/shared-types';
 
 const router = Router();
 
+// Public endpoints for waiter QR scanning (no auth required)
+router.post(
+  '/scan',
+  publicLimiter,
+  [body('order_token').notEmpty()],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { order_token } = req.body;
+      const order = await OrderService.getOrderByToken(order_token);
+
+      if (!order) {
+        return res.status(404).json({ error: 'NotFound', message: 'Order not found or expired' });
+      }
+
+      res.json({
+        order,
+        can_claim: order.status === 'new',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/claim',
+  publicLimiter,
+  [
+    body('order_token').notEmpty(),
+    body('waiter_name').notEmpty().trim(),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { order_token, waiter_name } = req.body;
+      const order = await OrderService.claimOrder(order_token, waiter_name);
+
+      res.json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/items/delivered',
+  publicLimiter,
+  [
+    body('order_token').notEmpty(),
+    body('item_indices').isArray(),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { order_token, item_indices } = req.body;
+      const order = await OrderService.markItemsDelivered(order_token, item_indices);
+
+      res.json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  '/waiter/:waiterName',
+  publicLimiter,
+  async (req, res, next) => {
+    try {
+      const { waiterName } = req.params;
+      const orders = await OrderService.getWaiterOrders(waiterName);
+
+      res.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Protected endpoints for authenticated staff
 router.use(authenticate);
 router.use(apiLimiter);
 
@@ -82,36 +175,5 @@ router.get('/stats/summary', async (req: AuthRequest, res, next) => {
     next(error);
   }
 });
-
-router.post(
-  '/scan',
-  [body('order_token').notEmpty()],
-  async (req: AuthRequest, res, next) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const { order_token } = req.body;
-
-      const order = await OrderService.getOrderByToken(order_token);
-
-      if (!order) {
-        return res.status(404).json({ error: 'NotFound', message: 'Order not found' });
-      }
-
-      if (order.tenant_id !== req.user!.tenant_id) {
-        return res
-          .status(403)
-          .json({ error: 'Forbidden', message: 'Access denied' });
-      }
-
-      res.json(order);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
 
 export default router;

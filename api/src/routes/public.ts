@@ -151,4 +151,16 @@ router.post(
   }
 );
 
+router.get('/session/:sessionId/orders', async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+
+    const orders = await OrderService.getSessionOrders(sessionId);
+
+    res.json(orders);
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

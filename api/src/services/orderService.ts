@@ -58,7 +58,10 @@ export class OrderService {
     const order = result.rows[0];
 
     // Generate waiter QR code
-    const waiterQrUrl = `${config.appBaseDomain}/waiter/order/${orderToken}`;
+    const isLocal = config.env === 'development' || config.appBaseDomain.includes('localhost');
+    const waiterQrUrl = isLocal
+      ? `http://localhost:3002/waiter/order/${orderToken}`
+      : `https://${config.appBaseDomain}/waiter/order/${orderToken}`;
     const waiterQr = await QRCode.toDataURL(waiterQrUrl, {
       errorCorrectionLevel: 'H',
       margin: 2,
@@ -203,6 +206,111 @@ export class OrderService {
        WHERE tenant_id = $1
        GROUP BY status`,
       [tenantId]
+    );
+
+    return result.rows;
+  }
+
+  static async claimOrder(orderToken: string, waiterName: string): Promise<Order> {
+    const order = await this.getOrderByToken(orderToken);
+
+    if (!order) {
+      throw new AppError('Order not found or expired', 404);
+    }
+
+    if (order.status !== 'new') {
+      throw new AppError('Order has already been claimed', 400);
+    }
+
+    // Parse items and add delivery status
+    const items = JSON.parse(order.items as any);
+    const itemsWithStatus = items.map((item: any) => ({
+      ...item,
+      delivered: false,
+    }));
+
+    const result = await query(
+      `UPDATE orders
+       SET status = 'acknowledged',
+           items = $1,
+           waiter_ack_user_id = $2
+       WHERE order_token = $3
+       RETURNING id, tenant_id, menu_id, session_id, order_token,
+                 items, total_amount, currency, status, notes,
+                 waiter_ack_user_id, created_at, updated_at`,
+      [JSON.stringify(itemsWithStatus), waiterName, orderToken]
+    );
+
+    logger.info('Order claimed by waiter', { orderId: order.id, waiterName });
+    return result.rows[0];
+  }
+
+  static async markItemsDelivered(
+    orderToken: string,
+    itemIndices: number[]
+  ): Promise<Order> {
+    const order = await this.getOrderByToken(orderToken);
+
+    if (!order) {
+      throw new AppError('Order not found', 404);
+    }
+
+    const items = JSON.parse(order.items as any);
+
+    // Mark specified items as delivered
+    itemIndices.forEach((index) => {
+      if (items[index]) {
+        items[index].delivered = true;
+      }
+    });
+
+    // Check if all items are delivered
+    const allDelivered = items.every((item: any) => item.delivered);
+    const newStatus = allDelivered ? 'completed' : order.status;
+
+    const result = await query(
+      `UPDATE orders
+       SET items = $1, status = $2
+       WHERE order_token = $3
+       RETURNING id, tenant_id, menu_id, session_id, order_token,
+                 items, total_amount, currency, status, notes,
+                 waiter_ack_user_id, created_at, updated_at`,
+      [JSON.stringify(items), newStatus, orderToken]
+    );
+
+    logger.info('Items marked as delivered', {
+      orderId: order.id,
+      itemIndices,
+      allDelivered,
+    });
+
+    return result.rows[0];
+  }
+
+  static async getWaiterOrders(waiterName: string): Promise<Order[]> {
+    const result = await query(
+      `SELECT id, tenant_id, menu_id, session_id, order_token,
+              items, total_amount, currency, status, notes,
+              waiter_ack_user_id, created_at, updated_at
+       FROM orders
+       WHERE waiter_ack_user_id = $1
+         AND status IN ('acknowledged', 'in_progress')
+       ORDER BY created_at DESC`,
+      [waiterName]
+    );
+
+    return result.rows;
+  }
+
+  static async getSessionOrders(sessionId: string): Promise<Order[]> {
+    const result = await query(
+      `SELECT id, tenant_id, menu_id, session_id, order_token,
+              items, total_amount, currency, status, notes,
+              waiter_ack_user_id, created_at, updated_at
+       FROM orders
+       WHERE session_id = $1
+       ORDER BY created_at DESC`,
+      [sessionId]
     );
 
     return result.rows;
