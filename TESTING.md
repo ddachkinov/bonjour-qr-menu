@@ -4,9 +4,9 @@
 
 The project includes a comprehensive end-to-end testing script that simulates all user roles:
 - 👨‍💼 **Owner** - Restaurant management
-- 🍽️ **Waiter** - Order handling and delivery
-- 👤 **Customer** - Menu browsing and ordering
-- 👨‍🍳 **Kitchen** - Order preparation (future)
+- 🍽️ **Waiter** - Order handling and delivery with real-time updates
+- 👤 **Customer** - Menu browsing and ordering with live status tracking
+- 👨‍🍳 **Kitchen** - Kitchen Display System with real-time order queue ✨ NEW
 - 🍹 **Bar** - Drink orders (future)
 
 ### Prerequisites
@@ -143,6 +143,8 @@ Test Summary
 4. Place order
 5. View waiter QR code
 6. Check order history at `/orders/history`
+7. **NEW - Real-time updates**: Watch order status change live when waiter claims/delivers
+8. **NEW**: See toast notifications when waiter claims order or delivers items
 
 ### Test as Waiter
 
@@ -155,6 +157,20 @@ Test Summary
 5. Claim order
 6. Mark items as delivered
 7. View your orders at `/waiter/my-orders`
+8. **NEW - Real-time updates**: Orders update instantly without refreshing
+9. **NEW**: See "Live" indicator showing WebSocket connection status
+
+### Test Kitchen Display System
+
+1. Get tenant ID: `./scripts/get-tenant-id.sh demo@restaurant.com`
+2. Open kitchen display: `http://localhost:3002/kitchen?tenant_id=[tenant-id]`
+3. Place an order as a customer (in another browser window/tab)
+4. **Real-time**: See order appear instantly in "New Orders" column with sound alert
+5. Have waiter claim the order
+6. **Real-time**: Watch order move to "In Progress" column automatically
+7. Have waiter mark items as delivered
+8. **Real-time**: Watch order move to "Ready" column when all items delivered
+9. Verify connection status indicator shows "Connected" with green pulse
 
 ### Test Order Flow End-to-End
 
