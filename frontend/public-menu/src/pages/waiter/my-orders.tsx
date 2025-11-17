@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useSocket } from '../../hooks/useSocket';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -32,6 +33,8 @@ export default function MyOrders() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [waiterId, setWaiterId] = useState<string | null>(null);
   const [waiterName, setWaiterName] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     checkAuth();
@@ -40,15 +43,48 @@ export default function MyOrders() {
   useEffect(() => {
     if (isAuthenticated && waiterId) {
       fetchOrders(waiterId);
-      const interval = setInterval(() => fetchOrders(waiterId), 10000); // Refresh every 10 seconds
-      return () => clearInterval(interval);
     }
   }, [isAuthenticated, waiterId]);
+
+  // WebSocket real-time updates
+  useEffect(() => {
+    if (!socket || !isConnected || !waiterId || !tenantId) return;
+
+    // Join waiter room for this specific waiter
+    socket.emit('join_waiter', { tenantId, waiterId });
+
+    // Listen for order updates
+    socket.on('order:updated', (order: Order) => {
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
+    });
+
+    socket.on('order:claimed', (order: Order) => {
+      // Add to list if this waiter claimed it
+      if (order.waiter_ack_user_id === waiterId) {
+        setOrders((prev) => {
+          const exists = prev.some((o) => o.id === order.id);
+          return exists ? prev.map((o) => (o.id === order.id ? order : o)) : [order, ...prev];
+        });
+        toast.success(`You claimed order #${order.id.substring(0, 6).toUpperCase()}`);
+      }
+    });
+
+    socket.on('order:items_delivered', (order: Order) => {
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
+    });
+
+    return () => {
+      socket.off('order:updated');
+      socket.off('order:claimed');
+      socket.off('order:items_delivered');
+    };
+  }, [socket, isConnected, waiterId, tenantId]);
 
   const checkAuth = async () => {
     const token = localStorage.getItem('waiter_token');
     const id = localStorage.getItem('waiter_id');
     const name = localStorage.getItem('waiter_name');
+    const tid = localStorage.getItem('waiter_tenant_id');
 
     if (!token || !id || !name) {
       // Redirect to login
@@ -61,11 +97,13 @@ export default function MyOrders() {
       setIsAuthenticated(true);
       setWaiterId(id);
       setWaiterName(name);
+      setTenantId(tid);
     } catch (error) {
       // Token invalid, clear and redirect to login
       localStorage.removeItem('waiter_token');
       localStorage.removeItem('waiter_id');
       localStorage.removeItem('waiter_name');
+      localStorage.removeItem('waiter_tenant_id');
       router.push('/waiter/login?redirect=/waiter/my-orders');
     }
   };
@@ -126,8 +164,22 @@ export default function MyOrders() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
-          <p className="text-sm text-gray-600 mt-1">Waiter: {waiterName}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+              <p className="text-sm text-gray-600 mt-1">Waiter: {waiterName}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                }`}
+              />
+              <span className="text-sm text-gray-600">
+                {isConnected ? 'Live' : 'Offline'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

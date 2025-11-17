@@ -42,6 +42,7 @@ export default function WaiterLogin() {
       localStorage.removeItem('waiter_token');
       localStorage.removeItem('waiter_id');
       localStorage.removeItem('waiter_name');
+      localStorage.removeItem('waiter_tenant_id');
     }
   };
 
@@ -106,6 +107,7 @@ export default function WaiterLogin() {
       localStorage.setItem('waiter_token', token);
       localStorage.setItem('waiter_id', waiter.id);
       localStorage.setItem('waiter_name', waiter.name);
+      localStorage.setItem('waiter_tenant_id', tenant_id as string);
 
       toast.success(`Welcome, ${waiter.name}!`);
 

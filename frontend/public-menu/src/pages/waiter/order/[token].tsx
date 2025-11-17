@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useSocket } from '../../../hooks/useSocket';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -34,6 +35,8 @@ export default function WaiterOrderView() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [waiterId, setWaiterId] = useState<string | null>(null);
   const [waiterName, setWaiterName] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     checkAuth();
@@ -45,10 +48,42 @@ export default function WaiterOrderView() {
     }
   }, [token, isAuthenticated]);
 
+  // WebSocket real-time updates
+  useEffect(() => {
+    if (!socket || !isConnected || !waiterId || !tenantId || !order) return;
+
+    // Join waiter room
+    socket.emit('join_waiter', { tenantId, waiterId });
+
+    // Listen for order updates
+    socket.on('order:updated', (updatedOrder: Order) => {
+      if (updatedOrder.id === order.id) {
+        setOrder(updatedOrder);
+      }
+    });
+
+    socket.on('order:items_delivered', (updatedOrder: Order) => {
+      if (updatedOrder.id === order.id) {
+        setOrder(updatedOrder);
+        const items = typeof updatedOrder.items === 'string' ? JSON.parse(updatedOrder.items) : updatedOrder.items;
+        const allDelivered = items.every((item: OrderItem) => item.delivered);
+        if (allDelivered) {
+          toast.success('All items delivered! Order completed.');
+        }
+      }
+    });
+
+    return () => {
+      socket.off('order:updated');
+      socket.off('order:items_delivered');
+    };
+  }, [socket, isConnected, waiterId, tenantId, order?.id]);
+
   const checkAuth = async () => {
     const token = localStorage.getItem('waiter_token');
     const id = localStorage.getItem('waiter_id');
     const name = localStorage.getItem('waiter_name');
+    const tid = localStorage.getItem('waiter_tenant_id');
 
     if (!token || !id || !name) {
       // Redirect to login with return URL
@@ -62,11 +97,13 @@ export default function WaiterOrderView() {
       setIsAuthenticated(true);
       setWaiterId(id);
       setWaiterName(name);
+      setTenantId(tid);
     } catch (error) {
       // Token invalid, clear and redirect to login
       localStorage.removeItem('waiter_token');
       localStorage.removeItem('waiter_id');
       localStorage.removeItem('waiter_name');
+      localStorage.removeItem('waiter_tenant_id');
       const currentPath = router.asPath;
       router.push(`/waiter/login?tenant_id=${order?.tenant_id || ''}&redirect=${encodeURIComponent(currentPath)}`);
     }
@@ -162,14 +199,28 @@ export default function WaiterOrderView() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isClaimed ? 'Order Details' : 'New Order'}
-          </h1>
-          {waiterName && (
-            <p className="text-sm text-gray-600 mt-1">
-              Waiter: {waiterName}
-            </p>
-          )}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {isClaimed ? 'Order Details' : 'New Order'}
+              </h1>
+              {waiterName && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Waiter: {waiterName}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                }`}
+              />
+              <span className="text-sm text-gray-600">
+                {isConnected ? 'Live' : 'Offline'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

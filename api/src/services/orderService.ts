@@ -7,6 +7,7 @@ import { SessionService } from './sessionService';
 import { config } from '../config';
 import type { Order, OrderStatus, CartItem } from '@qrmenu/shared-types';
 import QRCode from 'qrcode';
+import { socketEvents } from '../socket';
 
 export class OrderService {
   static async createOrder(
@@ -76,6 +77,13 @@ export class OrderService {
       tenantId: order.tenant_id,
       sessionId,
     });
+
+    // Emit socket event
+    try {
+      socketEvents.orderCreated(order.tenant_id, order);
+    } catch (error) {
+      logger.error('Failed to emit order:created event', error);
+    }
 
     return { order, waiter_qr: waiterQr };
   }
@@ -148,7 +156,17 @@ export class OrderService {
     }
 
     logger.info('Order status updated', { orderId, status, tenantId });
-    return result.rows[0];
+
+    const updatedOrder = result.rows[0];
+
+    // Emit socket event
+    try {
+      socketEvents.orderUpdated(updatedOrder.tenant_id, updatedOrder);
+    } catch (error) {
+      logger.error('Failed to emit order:updated event', error);
+    }
+
+    return updatedOrder;
   }
 
   static async listOrders(
@@ -242,7 +260,17 @@ export class OrderService {
     );
 
     logger.info('Order claimed by waiter', { orderId: order.id, waiterId });
-    return result.rows[0];
+
+    const claimedOrder = result.rows[0];
+
+    // Emit socket event
+    try {
+      socketEvents.orderClaimed(claimedOrder.tenant_id, claimedOrder, waiterId);
+    } catch (error) {
+      logger.error('Failed to emit order:claimed event', error);
+    }
+
+    return claimedOrder;
   }
 
   static async markItemsDelivered(
@@ -274,7 +302,7 @@ export class OrderService {
        WHERE order_token = $3
        RETURNING id, tenant_id, menu_id, session_id, order_token,
                  items, total_amount, currency, status, notes,
-                 waiter_ack_user_id, created_at, updated_at`,
+                 waiter_id, created_at, updated_at`,
       [JSON.stringify(items), newStatus, orderToken]
     );
 
@@ -284,7 +312,16 @@ export class OrderService {
       allDelivered,
     });
 
-    return result.rows[0];
+    const updatedOrder = result.rows[0];
+
+    // Emit socket event
+    try {
+      socketEvents.itemsDelivered(updatedOrder.tenant_id, updatedOrder);
+    } catch (error) {
+      logger.error('Failed to emit order:items_delivered event', error);
+    }
+
+    return updatedOrder;
   }
 
   static async getWaiterOrders(waiterId: string): Promise<Order[]> {

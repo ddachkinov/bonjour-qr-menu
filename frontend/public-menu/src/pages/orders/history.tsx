@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import publicApi from '../../lib/api';
 import { useCartStore } from '../../store/cartStore';
 import toast from 'react-hot-toast';
+import { useSocket } from '../../hooks/useSocket';
 
 interface OrderItem {
   item_id: string;
@@ -28,16 +29,70 @@ export default function OrderHistory() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     if (sessionId) {
       fetchOrders();
-      const interval = setInterval(fetchOrders, 15000); // Refresh every 15 seconds
-      return () => clearInterval(interval);
     } else {
       setIsLoading(false);
     }
   }, [sessionId]);
+
+  // WebSocket real-time updates
+  useEffect(() => {
+    if (!socket || !isConnected || !sessionId) return;
+
+    // Join session room to receive updates for this customer's orders
+    socket.emit('join_session', sessionId);
+
+    // Listen for new orders
+    socket.on('order:created', (order: Order) => {
+      setOrders((prev) => [order, ...prev]);
+      toast.success('Order placed successfully!', { icon: '✅' });
+    });
+
+    // Listen for order updates
+    socket.on('order:updated', (updatedOrder: Order) => {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+      );
+    });
+
+    // Listen for order claims
+    socket.on('order:claimed', (updatedOrder: Order) => {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+      );
+      toast.success('Your order has been claimed by a waiter!', { icon: '👋' });
+    });
+
+    // Listen for item delivery updates
+    socket.on('order:items_delivered', (updatedOrder: Order) => {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+      );
+
+      const items = typeof updatedOrder.items === 'string'
+        ? JSON.parse(updatedOrder.items)
+        : updatedOrder.items;
+      const allDelivered = items.every((item: OrderItem) => item.delivered);
+
+      if (allDelivered) {
+        toast.success('All items delivered! Enjoy your meal!', { icon: '🎉', duration: 5000 });
+      } else {
+        const deliveredCount = items.filter((item: OrderItem) => item.delivered).length;
+        toast.success(`${deliveredCount} of ${items.length} items delivered`, { icon: '🍽️' });
+      }
+    });
+
+    return () => {
+      socket.off('order:created');
+      socket.off('order:updated');
+      socket.off('order:claimed');
+      socket.off('order:items_delivered');
+    };
+  }, [socket, isConnected, sessionId]);
 
   const fetchOrders = async () => {
     try {
@@ -119,21 +174,35 @@ export default function OrderHistory() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center">
-          <button
-            onClick={() => router.back()}
-            className="mr-4 text-gray-600 hover:text-gray-900"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="mr-4 text-gray-600 hover:text-gray-900"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900">Order History</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                }`}
               />
-            </svg>
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Order History</h1>
+              <span className="text-sm text-gray-600">
+                {isConnected ? 'Live' : 'Offline'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
