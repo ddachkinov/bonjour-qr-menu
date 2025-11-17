@@ -1,0 +1,56 @@
+{
+  "menu": {
+    "loadingMenu": "Зареждане на менюто...",
+    "menuNotFound": "Менюто не е намерено",
+    "table": "Маса",
+    "addToCart": "Добавете в количката",
+    "viewCart": "Вижте количката",
+    "yourCart": "Вашата количка",
+    "total": "Общо",
+    "placeOrder": "Направете поръчка",
+    "orderMore": "Поръчайте още"
+  },
+  "cart": {
+    "empty": "Количката е празна",
+    "items": "артикула",
+    "item": "артикул",
+    "addedToCart": "{{item}} е добавен в количката!"
+  },
+  "order": {
+    "orderPlaced": "Поръчката е направена!",
+    "orderFailed": "Неуспешна поръчка",
+    "showQRToWaiter": "Покажете този QR код на сервитьора, когато поръчката ви е готова",
+    "viewOrderHistory": "Вижте историята на поръчките",
+    "orderHistory": "История на поръчките",
+    "noSession": "Няма сесия",
+    "sessionNotInitialized": "Сесията не е инициализирана",
+    "failedToInitializeSession": "Неуспешно инициализиране на сесията",
+    "failedToLoadMenu": "Неуспешно зареждане на менюто",
+    "failedToAddToCart": "Неуспешно добавяне в количката",
+    "failedToSubmitOrder": "Неуспешно изпращане на поръчката"
+  },
+  "waiter": {
+    "login": "Вход за сервитьори",
+    "myOrders": "Моите поръчки",
+    "orderDetails": "Детайли на поръчката",
+    "scanQR": "Сканирайте QR кода",
+    "invalidToken": "Невалиден токен",
+    "orderNotFound": "Поръчката не е намерена"
+  },
+  "kitchen": {
+    "kitchenDisplay": "Кухненски дисплей",
+    "activeOrders": "Активни поръчки",
+    "completedOrders": "Завършени поръчки",
+    "markAsReady": "Маркирайте като готова",
+    "markAsDelivered": "Маркирайте като доставена"
+  },
+  "common": {
+    "loading": "Зареждане...",
+    "close": "Затваряне",
+    "back": "Назад",
+    "cancel": "Отказ",
+    "confirm": "Потвърдете",
+    "error": "Грешка",
+    "success": "Успех"
+  }
+}

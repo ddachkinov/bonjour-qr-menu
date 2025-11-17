@@ -1,0 +1,56 @@
+{
+  "menu": {
+    "loadingMenu": "Loading menu...",
+    "menuNotFound": "Menu not found",
+    "table": "Table",
+    "addToCart": "Add to Cart",
+    "viewCart": "View Cart",
+    "yourCart": "Your Cart",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "orderMore": "Order More"
+  },
+  "cart": {
+    "empty": "Cart is empty",
+    "items": "items",
+    "item": "item",
+    "addedToCart": "{{item}} added to cart!"
+  },
+  "order": {
+    "orderPlaced": "Order Placed!",
+    "orderFailed": "Order failed",
+    "showQRToWaiter": "Show this QR code to the waiter when your order is ready",
+    "viewOrderHistory": "View Order History",
+    "orderHistory": "Order History",
+    "noSession": "No session",
+    "sessionNotInitialized": "Session not initialized",
+    "failedToInitializeSession": "Failed to initialize session",
+    "failedToLoadMenu": "Failed to load menu",
+    "failedToAddToCart": "Failed to add to cart",
+    "failedToSubmitOrder": "Failed to submit order"
+  },
+  "waiter": {
+    "login": "Waiter Login",
+    "myOrders": "My Orders",
+    "orderDetails": "Order Details",
+    "scanQR": "Scan QR Code",
+    "invalidToken": "Invalid token",
+    "orderNotFound": "Order not found"
+  },
+  "kitchen": {
+    "kitchenDisplay": "Kitchen Display",
+    "activeOrders": "Active Orders",
+    "completedOrders": "Completed Orders",
+    "markAsReady": "Mark as Ready",
+    "markAsDelivered": "Mark as Delivered"
+  },
+  "common": {
+    "loading": "Loading...",
+    "close": "Close",
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success"
+  }
+}

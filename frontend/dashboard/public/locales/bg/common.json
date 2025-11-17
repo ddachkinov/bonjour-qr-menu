@@ -1,0 +1,94 @@
+{
+  "app": {
+    "title": "QR Menu Dashboard",
+    "name": "QR Menu"
+  },
+  "auth": {
+    "login": "Вход",
+    "logout": "Изход",
+    "signup": "Регистрация",
+    "signIn": "Влезте",
+    "signingIn": "Влизане...",
+    "email": "Имейл адрес",
+    "password": "Парола",
+    "emailRequired": "Имейлът е задължителен",
+    "passwordRequired": "Паролата е задължителна",
+    "loginSuccessful": "Успешен вход!",
+    "loginFailed": "Неуспешен вход",
+    "signInPrompt": "Влезте, за да управлявате менюто на вашия ресторант",
+    "noAccount": "Нямате акаунт? Регистрирайте се"
+  },
+  "navigation": {
+    "menus": "Менюта",
+    "orders": "Поръчки",
+    "dashboard": "Табло"
+  },
+  "menu": {
+    "yourMenus": "Вашите менюта",
+    "createMenu": "Създайте меню",
+    "enterMenuTitle": "Въведете заглавие на менюто:",
+    "menuCreated": "Менюто е създадено!",
+    "failedToCreateMenu": "Неуспешно създаване на меню",
+    "failedToLoadMenus": "Неуспешно зареждане на менюта",
+    "noMenus": "Все още нямате менюта. Създайте първото си меню, за да започнете!",
+    "slug": "Slug",
+    "published": "Публикувано",
+    "draft": "Чернова",
+    "viewPublicMenu": "Вижте публичното меню →"
+  },
+  "common": {
+    "loading": "Зареждане...",
+    "save": "Запазване",
+    "cancel": "Отказ",
+    "delete": "Изтриване",
+    "edit": "Редактиране",
+    "add": "Добавяне",
+    "search": "Търсене",
+    "filter": "Филтриране",
+    "actions": "Действия",
+    "status": "Статус",
+    "yes": "Да",
+    "no": "Не",
+    "ok": "Добре",
+    "close": "Затваряне",
+    "back": "Назад",
+    "next": "Напред",
+    "submit": "Изпращане"
+  },
+  "items": {
+    "title": "Заглавие",
+    "description": "Описание",
+    "price": "Цена",
+    "category": "Категория",
+    "addItem": "Добавете артикул",
+    "editItem": "Редактирайте артикул",
+    "deleteItem": "Изтрийте артикул",
+    "itemAdded": "Артикулът е добавен!",
+    "itemUpdated": "Артикулът е актуализиран!",
+    "itemDeleted": "Артикулът е изтрит!"
+  },
+  "categories": {
+    "name": "Име",
+    "addCategory": "Добавете категория",
+    "editCategory": "Редактирайте категория",
+    "deleteCategory": "Изтрийте категория",
+    "categoryAdded": "Категорията е добавена!",
+    "categoryUpdated": "Категорията е актуализирана!",
+    "categoryDeleted": "Категорията е изтрита!"
+  },
+  "orders": {
+    "orders": "Поръчки",
+    "orderHistory": "История на поръчките",
+    "orderPlaced": "Поръчката е направена!",
+    "orderFailed": "Неуспешна поръчка",
+    "noOrders": "Все още няма поръчки",
+    "orderDetails": "Детайли на поръчката",
+    "orderStatus": "Статус на поръчката",
+    "pending": "Изчакване",
+    "confirmed": "Потвърдена",
+    "preparing": "Подготвяне",
+    "ready": "Готова",
+    "delivered": "Доставена",
+    "cancelled": "Отменена"
+  }
+}

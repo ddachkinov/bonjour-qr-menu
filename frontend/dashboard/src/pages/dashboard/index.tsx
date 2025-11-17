@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
 import type { Menu } from '@qrmenu/shared-types';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 export default function Dashboard() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { isAuthenticated, user, logout } = useAuthStore();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +28,7 @@ export default function Dashboard() {
       const response = await api.get('/menus');
       setMenus(response.data);
     } catch (error: any) {
-      toast.error('Failed to load menus');
+      toast.error(t('menu.failedToLoadMenus'));
     } finally {
       setIsLoading(false);
     }
@@ -36,22 +40,22 @@ export default function Dashboard() {
   };
 
   const createMenu = async () => {
-    const title = prompt('Enter menu title:');
+    const title = prompt(t('menu.enterMenuTitle'));
     if (!title) return;
 
     try {
       await api.post('/menus', { title });
-      toast.success('Menu created!');
+      toast.success(t('menu.menuCreated'));
       fetchMenus();
     } catch (error: any) {
-      toast.error('Failed to create menu');
+      toast.error(t('menu.failedToCreateMenu'));
     }
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -63,30 +67,31 @@ export default function Dashboard() {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold">QR Menu Dashboard</h1>
+                <h1 className="text-xl font-bold">{t('app.title')}</h1>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <a
                   href="/dashboard"
                   className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
-                  Menus
+                  {t('navigation.menus')}
                 </a>
                 <a
                   href="/dashboard/orders"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
-                  Orders
+                  {t('navigation.orders')}
                 </a>
               </div>
             </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-700 mr-4">{user?.email}</span>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <span className="text-sm text-gray-700">{user?.email}</span>
               <button
                 onClick={handleLogout}
                 className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                Logout
+                {t('auth.logout')}
               </button>
             </div>
           </div>
@@ -96,12 +101,12 @@ export default function Dashboard() {
       <div className="py-10">
         <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Your Menus</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('menu.yourMenus')}</h1>
             <button
               onClick={createMenu}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
             >
-              Create Menu
+              {t('menu.createMenu')}
             </button>
           </div>
         </header>
@@ -109,7 +114,7 @@ export default function Dashboard() {
           <div className="px-4 py-6 sm:px-0">
             {menus.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg shadow">
-                <p className="text-gray-500">No menus yet. Create your first menu to get started!</p>
+                <p className="text-gray-500">{t('menu.noMenus')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -121,7 +126,7 @@ export default function Dashboard() {
                   >
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg font-medium text-gray-900">{menu.title}</h3>
-                      <p className="mt-1 text-sm text-gray-500">Slug: {menu.slug}</p>
+                      <p className="mt-1 text-sm text-gray-500">{t('menu.slug')}: {menu.slug}</p>
                       <div className="mt-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -130,7 +135,7 @@ export default function Dashboard() {
                               : 'bg-gray-100 text-gray-800'
                           }`}
                         >
-                          {menu.published ? 'Published' : 'Draft'}
+                          {menu.published ? t('menu.published') : t('menu.draft')}
                         </span>
                       </div>
                       {menu.published && (
@@ -142,7 +147,7 @@ export default function Dashboard() {
                             className="text-sm text-indigo-600 hover:text-indigo-500"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            View public menu →
+                            {t('menu.viewPublicMenu')}
                           </a>
                         </div>
                       )}
@@ -156,4 +161,12 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

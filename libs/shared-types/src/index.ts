@@ -32,6 +32,16 @@ export interface Menu {
   public_url: string;
   created_at: Date;
   updated_at: Date;
+  translations?: MenuTranslation[];
+}
+
+export interface MenuTranslation {
+  id: string;
+  menu_id: string;
+  locale: string;
+  title: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Category {
@@ -40,6 +50,16 @@ export interface Category {
   tenant_id: string;
   name: string;
   position: number;
+  created_at: Date;
+  updated_at: Date;
+  translations?: CategoryTranslation[];
+}
+
+export interface CategoryTranslation {
+  id: string;
+  category_id: string;
+  locale: string;
+  name: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -57,6 +77,17 @@ export interface Item {
   tags: string[];
   sku?: string;
   dietary_flags: string[];
+  created_at: Date;
+  updated_at: Date;
+  translations?: ItemTranslation[];
+}
+
+export interface ItemTranslation {
+  id: string;
+  item_id: string;
+  locale: string;
+  title: string;
+  description?: string;
   created_at: Date;
   updated_at: Date;
 }

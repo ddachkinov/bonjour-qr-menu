@@ -10,7 +10,7 @@ CREATE TABLE tenants (
   name VARCHAR(255) NOT NULL,
   subdomain VARCHAR(100) UNIQUE NOT NULL,
   timezone VARCHAR(100) DEFAULT 'UTC',
-  locale VARCHAR(10) DEFAULT 'en-US',
+  locale VARCHAR(10) DEFAULT 'bg',
   branding JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

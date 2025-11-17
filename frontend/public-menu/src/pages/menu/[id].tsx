@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import publicApi from '../../lib/api';
 import { useCartStore } from '../../store/cartStore';
 import toast from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Menu, Category, Item } from '@qrmenu/shared-types';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 export default function PublicMenu() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { id, table } = router.query;
 
   const [menu, setMenu] = useState<Menu | null>(null);
@@ -45,7 +49,7 @@ export default function PublicMenu() {
       setCategories(response.data.categories);
       setItems(response.data.items);
     } catch (error: any) {
-      toast.error('Failed to load menu');
+      toast.error(t('order.failedToLoadMenu'));
     } finally {
       setIsLoading(false);
     }
@@ -57,13 +61,13 @@ export default function PublicMenu() {
     try {
       await createSession(menu.id, table as string | undefined);
     } catch (error: any) {
-      toast.error('Failed to initialize session');
+      toast.error(t('order.failedToInitializeSession'));
     }
   };
 
   const handleAddToCart = async (item: Item) => {
     if (!sessionId) {
-      toast.error('Session not initialized');
+      toast.error(t('order.sessionNotInitialized'));
       return;
     }
 
@@ -74,20 +78,20 @@ export default function PublicMenu() {
         unit_price: item.price,
         computed_price: item.price,
       });
-      toast.success(`${item.title} added to cart!`);
+      toast.success(t('cart.addedToCart', { item: item.title }));
     } catch (error: any) {
-      toast.error('Failed to add to cart');
+      toast.error(t('order.failedToAddToCart'));
     }
   };
 
   const handleSubmitOrder = async () => {
     if (!sessionId) {
-      toast.error('No session');
+      toast.error(t('order.noSession'));
       return;
     }
 
     if (!cart || cart.items.length === 0) {
-      toast.error('Cart is empty');
+      toast.error(t('cart.empty'));
       return;
     }
 
@@ -95,17 +99,17 @@ export default function PublicMenu() {
       const result = await submitOrder(sessionId);
       setWaiterQR(result.waiter_qr);
       setOrderComplete(true);
-      toast.success('Order placed successfully!');
+      toast.success(t('order.orderPlaced'));
       setShowCart(false);
     } catch (error: any) {
-      toast.error('Failed to submit order');
+      toast.error(t('order.failedToSubmitOrder'));
     }
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Loading menu...</p>
+        <p className="text-gray-600">{t('menu.loadingMenu')}</p>
       </div>
     );
   }
@@ -113,7 +117,7 @@ export default function PublicMenu() {
   if (!menu) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Menu not found</p>
+        <p className="text-gray-600">{t('menu.menuNotFound')}</p>
       </div>
     );
   }
@@ -137,9 +141,9 @@ export default function PublicMenu() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Placed!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('order.orderPlaced')}</h2>
           <p className="text-gray-600 mb-6">
-            Show this QR code to the waiter when your order is ready
+            {t('order.showQRToWaiter')}
           </p>
           <div className="flex justify-center mb-6">
             <img src={waiterQR} alt="Waiter QR Code" className="w-64 h-64" />
@@ -149,7 +153,7 @@ export default function PublicMenu() {
               onClick={() => router.push('/orders/history')}
               className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200"
             >
-              View Order History
+              {t('order.viewOrderHistory')}
             </button>
             <button
               onClick={() => {
@@ -159,7 +163,7 @@ export default function PublicMenu() {
               }}
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700"
             >
-              Order More
+              {t('menu.orderMore')}
             </button>
           </div>
         </div>
@@ -174,22 +178,25 @@ export default function PublicMenu() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{menu.title}</h1>
             {table && (
-              <p className="text-sm text-gray-500 mt-1">Table: {table}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('menu.table')}: {table}</p>
             )}
           </div>
-          <button
-            onClick={() => router.push('/orders/history')}
-            className="text-indigo-600 hover:text-indigo-700 p-2"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <button
+              onClick={() => router.push('/orders/history')}
+              className="text-indigo-600 hover:text-indigo-700 p-2"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -241,7 +248,7 @@ export default function PublicMenu() {
                         onClick={() => handleAddToCart(item)}
                         className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 font-medium active:bg-indigo-800 transition-colors"
                       >
-                        Add to Cart
+                        {t('menu.addToCart')}
                       </button>
                     </div>
                   </div>
@@ -258,7 +265,7 @@ export default function PublicMenu() {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-600">
-                  {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}
+                  {cart.items.length} {cart.items.length !== 1 ? t('cart.items') : t('cart.item')}
                 </p>
                 <p className="text-xl font-bold text-gray-900">
                   ${(cart.total / 100).toFixed(2)}
@@ -268,7 +275,7 @@ export default function PublicMenu() {
                 onClick={() => setShowCart(true)}
                 className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700"
               >
-                View Cart
+                {t('menu.viewCart')}
               </button>
             </div>
           </div>
@@ -279,7 +286,7 @@ export default function PublicMenu() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center sm:justify-center">
           <div className="bg-white w-full sm:max-w-lg sm:rounded-lg max-h-[90vh] overflow-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold">Your Cart</h2>
+              <h2 className="text-xl font-bold">{t('menu.yourCart')}</h2>
               <button
                 onClick={() => setShowCart(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -313,7 +320,7 @@ export default function PublicMenu() {
               </div>
               <div className="border-t border-gray-200 pt-4 mb-6">
                 <div className="flex justify-between items-center text-xl font-bold">
-                  <span>Total:</span>
+                  <span>{t('menu.total')}:</span>
                   <span>${(cart.total / 100).toFixed(2)}</span>
                 </div>
               </div>
@@ -321,7 +328,7 @@ export default function PublicMenu() {
                 onClick={handleSubmitOrder}
                 className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700"
               >
-                Place Order
+                {t('menu.placeOrder')}
               </button>
             </div>
           </div>
@@ -329,4 +336,12 @@ export default function PublicMenu() {
       )}
     </div>
   );
+}
+
+export async function getServerSideProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

@@ -1,0 +1,94 @@
+{
+  "app": {
+    "title": "QR Menu Dashboard",
+    "name": "QR Menu"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "email": "Email address",
+    "password": "Password",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "loginSuccessful": "Login successful!",
+    "loginFailed": "Login failed",
+    "signInPrompt": "Sign in to manage your restaurant menu",
+    "noAccount": "Don't have an account? Sign up"
+  },
+  "navigation": {
+    "menus": "Menus",
+    "orders": "Orders",
+    "dashboard": "Dashboard"
+  },
+  "menu": {
+    "yourMenus": "Your Menus",
+    "createMenu": "Create Menu",
+    "enterMenuTitle": "Enter menu title:",
+    "menuCreated": "Menu created!",
+    "failedToCreateMenu": "Failed to create menu",
+    "failedToLoadMenus": "Failed to load menus",
+    "noMenus": "No menus yet. Create your first menu to get started!",
+    "slug": "Slug",
+    "published": "Published",
+    "draft": "Draft",
+    "viewPublicMenu": "View public menu →"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "status": "Status",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+  "items": {
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "category": "Category",
+    "addItem": "Add Item",
+    "editItem": "Edit Item",
+    "deleteItem": "Delete Item",
+    "itemAdded": "Item added!",
+    "itemUpdated": "Item updated!",
+    "itemDeleted": "Item deleted!"
+  },
+  "categories": {
+    "name": "Name",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "deleteCategory": "Delete Category",
+    "categoryAdded": "Category added!",
+    "categoryUpdated": "Category updated!",
+    "categoryDeleted": "Category deleted!"
+  },
+  "orders": {
+    "orders": "Orders",
+    "orderHistory": "Order History",
+    "orderPlaced": "Order placed!",
+    "orderFailed": "Order failed",
+    "noOrders": "No orders yet",
+    "orderDetails": "Order Details",
+    "orderStatus": "Order Status",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  }
+}
