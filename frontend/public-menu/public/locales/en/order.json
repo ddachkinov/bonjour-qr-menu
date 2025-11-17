@@ -1,0 +1,23 @@
+{
+  "orderPlaced": "Order Placed!",
+  "orderPlacedMessage": "Show this QR code to the waiter when your order is ready",
+  "orderNumber": "Order Number",
+  "orderId": "Order ID",
+  "orderHistory": "Order History",
+  "viewOrderHistory": "View Order History",
+  "orderMore": "Order More",
+  "backToMenu": "Back to Menu",
+  "orderStatus": "Order Status",
+  "pending": "Pending",
+  "preparing": "Preparing",
+  "ready": "Ready",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "orderDetails": "Order Details",
+  "items": "Items",
+  "total": "Total",
+  "tableNumber": "Table Number",
+  "orderTime": "Order Time",
+  "noOrders": "You haven't placed any orders yet",
+  "startOrdering": "Start ordering from the menu"
+}

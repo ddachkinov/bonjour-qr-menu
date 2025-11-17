@@ -1,0 +1,14 @@
+{
+  "loading": "Зареждане...",
+  "error": "Грешка",
+  "success": "Успех",
+  "cancel": "Отказ",
+  "confirm": "Потвърди",
+  "close": "Затвори",
+  "back": "Назад",
+  "next": "Напред",
+  "language": "Език",
+  "bulgarian": "Български",
+  "english": "English",
+  "currency": "лв."
+}

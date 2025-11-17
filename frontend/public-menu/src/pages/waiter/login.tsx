@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -7,6 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function WaiterLogin() {
   const router = useRouter();
+  const { t } = useTranslation(['waiter', 'common']);
   const { tenant_id, redirect } = router.query;
 
   const [name, setName] = useState('');
@@ -78,12 +81,12 @@ export default function WaiterLogin() {
     const pinToUse = pinValue || pin.join('');
 
     if (!name.trim()) {
-      toast.error('Please enter your name');
+      toast.error(t('waiter:nameRequired'));
       return;
     }
 
     if (pinToUse.length !== 4) {
-      toast.error('Please enter your 4-digit PIN');
+      toast.error(t('waiter:pinRequired'));
       return;
     }
 
@@ -109,7 +112,7 @@ export default function WaiterLogin() {
       localStorage.setItem('waiter_name', waiter.name);
       localStorage.setItem('waiter_tenant_id', tenant_id as string);
 
-      toast.success(`Welcome, ${waiter.name}!`);
+      toast.success(t('waiter:welcome', { name: waiter.name }));
 
       // Redirect to appropriate page
       if (redirect) {
@@ -118,7 +121,7 @@ export default function WaiterLogin() {
         router.push('/waiter/my-orders');
       }
     } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Invalid name or PIN';
+      const errorMsg = error.response?.data?.message || t('waiter:invalidCredentials');
       toast.error(errorMsg);
       // Clear PIN on error
       setPin(['', '', '', '']);
@@ -152,21 +155,21 @@ export default function WaiterLogin() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Waiter Login</h1>
-          <p className="text-gray-600">Enter your name and PIN to continue</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('waiter:title')}</h1>
+          <p className="text-gray-600">{t('waiter:subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Your Name
+              {t('waiter:yourName')}
             </label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
+              placeholder={t('waiter:enterName')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg"
               autoFocus
               disabled={isLoading}
@@ -174,7 +177,7 @@ export default function WaiterLogin() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">4-Digit PIN</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('waiter:pin')}</label>
             <div className="flex justify-center gap-3">
               {pin.map((digit, index) => (
                 <input
@@ -198,16 +201,24 @@ export default function WaiterLogin() {
             disabled={isLoading || !name.trim() || pin.some((d) => d === '')}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold py-4 rounded-lg text-lg transition-colors"
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? t('waiter:loggingIn') : t('waiter:login')}
           </button>
         </form>
 
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-center text-sm text-gray-600">
-            First time? Contact your manager to get your PIN.
+            {t('waiter:contactManager')}
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['waiter', 'common'])),
+    },
+  };
 }

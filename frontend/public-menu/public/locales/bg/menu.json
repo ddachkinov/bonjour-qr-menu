@@ -1,0 +1,20 @@
+{
+  "menuNotFound": "Менюто не е намерено",
+  "loadingMenu": "Зареждане на меню...",
+  "failedToLoadMenu": "Неуспешно зареждане на меню",
+  "categories": "Категории",
+  "allCategories": "Всички категории",
+  "addToCart": "Добави в количката",
+  "addedToCart": "{{item}} е добавен в количката!",
+  "failedToAddToCart": "Неуспешно добавяне в количката",
+  "unavailable": "Неналичен",
+  "viewCart": "Виж количката",
+  "dietary": {
+    "vegetarian": "Вегетарианско",
+    "vegan": "Веган",
+    "glutenFree": "Без глутен",
+    "dairyFree": "Без млечни продукти",
+    "nutFree": "Без ядки",
+    "spicy": "Люто"
+  }
+}

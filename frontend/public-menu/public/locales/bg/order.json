@@ -1,0 +1,23 @@
+{
+  "orderPlaced": "Поръчката е направена!",
+  "orderPlacedMessage": "Покажете този QR код на сервитьора, когато поръчката ви е готова",
+  "orderNumber": "Номер на поръчка",
+  "orderId": "ID на поръчка",
+  "orderHistory": "История на поръчките",
+  "viewOrderHistory": "Виж история на поръчките",
+  "orderMore": "Поръчай още",
+  "backToMenu": "Обратно към менюто",
+  "orderStatus": "Статус на поръчката",
+  "pending": "Изчакваща",
+  "preparing": "В подготовка",
+  "ready": "Готова",
+  "delivered": "Доставена",
+  "cancelled": "Отменена",
+  "orderDetails": "Детайли на поръчката",
+  "items": "Артикули",
+  "total": "Общо",
+  "tableNumber": "Номер на маса",
+  "orderTime": "Време на поръчка",
+  "noOrders": "Все още нямате поръчки",
+  "startOrdering": "Започнете да поръчвате от менюто"
+}

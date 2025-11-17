@@ -1,10 +1,11 @@
 import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { appWithTranslation } from 'next-i18next';
 import { useAuthStore } from '../store/authStore';
 import '../styles/globals.css';
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   const initialize = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
@@ -18,3 +19,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+export default appWithTranslation(App);

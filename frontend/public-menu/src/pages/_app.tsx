@@ -1,8 +1,9 @@
 import type { AppProps } from 'next/app';
 import { Toaster } from 'react-hot-toast';
+import { appWithTranslation } from 'next-i18next';
 import '../styles/globals.css';
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Component {...pageProps} />
@@ -10,3 +11,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+export default appWithTranslation(App);

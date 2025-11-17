@@ -1,0 +1,23 @@
+{
+  "appName": "QR Menu Dashboard",
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "create": "Create",
+  "back": "Back",
+  "next": "Next",
+  "previous": "Previous",
+  "submit": "Submit",
+  "search": "Search",
+  "filter": "Filter",
+  "yes": "Yes",
+  "no": "No",
+  "confirm": "Confirm",
+  "close": "Close",
+  "logout": "Logout",
+  "language": "Language",
+  "bulgarian": "Български",
+  "english": "English"
+}

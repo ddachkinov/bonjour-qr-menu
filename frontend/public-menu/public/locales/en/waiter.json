@@ -1,0 +1,17 @@
+{
+  "waiterLogin": "Waiter Login",
+  "title": "Waiter Login",
+  "subtitle": "Enter your name and PIN to continue",
+  "yourName": "Your Name",
+  "pin": "4-Digit PIN",
+  "enterName": "Enter your name",
+  "enterPin": "Enter your PIN",
+  "nameRequired": "Please enter your name",
+  "pinRequired": "Please enter your 4-digit PIN",
+  "contactManager": "Contact your manager to get your PIN",
+  "login": "Login",
+  "loggingIn": "Logging in...",
+  "welcome": "Welcome, {{name}}!",
+  "loginFailed": "Login failed",
+  "invalidCredentials": "Invalid name or PIN"
+}

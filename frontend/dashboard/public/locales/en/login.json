@@ -1,0 +1,14 @@
+{
+  "title": "QR Menu Dashboard",
+  "subtitle": "Sign in to manage your restaurant menu",
+  "email": "Email address",
+  "password": "Password",
+  "emailRequired": "Email is required",
+  "passwordRequired": "Password is required",
+  "signingIn": "Signing in...",
+  "signIn": "Sign in",
+  "noAccount": "Don't have an account?",
+  "signUp": "Sign up",
+  "loginSuccess": "Login successful!",
+  "loginFailed": "Login failed"
+}

@@ -1,0 +1,20 @@
+{
+  "menuNotFound": "Menu not found",
+  "loadingMenu": "Loading menu...",
+  "failedToLoadMenu": "Failed to load menu",
+  "categories": "Categories",
+  "allCategories": "All Categories",
+  "addToCart": "Add to Cart",
+  "addedToCart": "{{item}} added to cart!",
+  "failedToAddToCart": "Failed to add to cart",
+  "unavailable": "Unavailable",
+  "viewCart": "View Cart",
+  "dietary": {
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "glutenFree": "Gluten Free",
+    "dairyFree": "Dairy Free",
+    "nutFree": "Nut Free",
+    "spicy": "Spicy"
+  }
+}

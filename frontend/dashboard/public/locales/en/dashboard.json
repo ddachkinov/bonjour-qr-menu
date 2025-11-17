@@ -1,0 +1,18 @@
+{
+  "welcome": "Welcome",
+  "yourMenus": "Your Menus",
+  "createMenu": "Create Menu",
+  "noMenus": "No menus yet. Create your first menu to get started!",
+  "menus": "Menus",
+  "orders": "Orders",
+  "kitchenDisplay": "Kitchen Display",
+  "settings": "Settings",
+  "published": "Published",
+  "draft": "Draft",
+  "viewPublicMenu": "View public menu",
+  "editMenu": "Edit menu",
+  "deleteMenu": "Delete menu",
+  "confirmDelete": "Are you sure you want to delete this menu?",
+  "menuDeleted": "Menu deleted successfully",
+  "menuDeleteFailed": "Failed to delete menu"
+}

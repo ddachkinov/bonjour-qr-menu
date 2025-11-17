@@ -1,0 +1,23 @@
+{
+  "appName": "QR Меню Табло",
+  "loading": "Зареждане...",
+  "save": "Запази",
+  "cancel": "Отказ",
+  "delete": "Изтрий",
+  "edit": "Редактирай",
+  "create": "Създай",
+  "back": "Назад",
+  "next": "Напред",
+  "previous": "Предишен",
+  "submit": "Изпрати",
+  "search": "Търси",
+  "filter": "Филтрирай",
+  "yes": "Да",
+  "no": "Не",
+  "confirm": "Потвърди",
+  "close": "Затвори",
+  "logout": "Излез",
+  "language": "Език",
+  "bulgarian": "Български",
+  "english": "English"
+}
