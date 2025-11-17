@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -7,6 +8,7 @@ import { logger } from './utils/logger';
 import { connectRedis } from './db/redis';
 import { pool } from './db';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { initializeSocket } from './socket';
 
 import authRoutes from './routes/auth';
 import menuRoutes from './routes/menus';
@@ -53,9 +55,17 @@ const startServer = async () => {
     await pool.query('SELECT NOW()');
     logger.info('Connected to PostgreSQL');
 
-    app.listen(config.port, () => {
+    // Create HTTP server
+    const httpServer = http.createServer(app);
+
+    // Initialize Socket.io
+    initializeSocket(httpServer);
+    logger.info('Socket.io initialized');
+
+    httpServer.listen(config.port, () => {
       logger.info(`API server running on port ${config.port}`);
       logger.info(`Environment: ${config.env}`);
+      logger.info(`WebSocket server ready`);
     });
   } catch (error) {
     logger.error('Failed to start server', error);

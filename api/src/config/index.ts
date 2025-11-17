@@ -59,6 +59,10 @@ export const config = {
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   },
 
+  waiter: {
+    tokenExpiry: process.env.WAITER_TOKEN_EXPIRY || '30d', // Default 30 days, can set to '8h' for shift-based
+  },
+
   features: {
     customDomains: process.env.ENABLE_CUSTOM_DOMAINS === 'true',
     webhooks: process.env.ENABLE_WEBHOOKS === 'true',

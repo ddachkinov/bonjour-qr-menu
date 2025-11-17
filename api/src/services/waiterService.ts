@@ -23,7 +23,6 @@ export interface WaiterAuthResponse {
 
 export class WaiterService {
   private static readonly SALT_ROUNDS = 10;
-  private static readonly TOKEN_EXPIRY = '8h'; // 8 hour shift
 
   static async createWaiter(
     tenantId: string,
@@ -86,7 +85,7 @@ export class WaiterService {
         type: 'waiter',
       },
       config.jwt.secret,
-      { expiresIn: this.TOKEN_EXPIRY }
+      { expiresIn: config.waiter.tokenExpiry }
     );
 
     logger.info('Waiter authenticated', { waiterId: waiter.id, name: waiter.name });
